@@ -1,19 +1,281 @@
-CleanPy
+<div align="center">"cleanpy"
 
-<p align="center">
-  <strong>Clean Python. Less noise.</strong>
-  <br>
-  A lightweight utility for stripping comments and docstrings from Python source files.
-</p><p align="center">
-  <img src="https://img.shields.io/badge/python-3.x-111111?style=flat-square&logo=python&logoColor=white">
-  <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square">
-  <img src="https://img.shields.io/badge/status-active-111111?style=flat-square">
-</p>---
+Strip the noise. Keep the code.
 
-Overview
+A lightweight Python utility for removing comments and docstrings from ".py" files — without touching the original source.
 
-CleanPy removes unnecessary comments and docstrings from Python source code while keeping the executable code intact.
+<br><img src="https://img.shields.io/badge/Python-3.x-18181B?style=flat-square&logo=python&logoColor=white" alt="Python">
+<img src="https://img.shields.io/badge/Dependencies-None-18181B?style=flat-square" alt="Dependencies">
+<img src="https://img.shields.io/badge/License-MIT-18181B?style=flat-square" alt="License"><br><br>
 
+              source.py
+                  │
+                  ▼
+        ┌───────────────────┐
+        │      cleanpy      │
+        │                   │
+        │  comments    ×    │
+        │  docstrings  ×    │
+        │  code        ✓    │
+        └─────────┬─────────┘
+                  │
+                  ▼
+           source_clean.py
+
+<br>"Usage" (#usage) · "How it works" (#how-it-works) · "Examples" (#examples) · "License" (#license)
+
+</div>"01" — The idea
+
+Python source files naturally collect comments, documentation strings, and other pieces of descriptive text during development.
+
+Sometimes you simply want the source without that extra layer.
+
+That's where "cleanpy" comes in.
+
+BEFORE                         AFTER
+
+# explanation                 def calculate(a, b):
+                              │
+def calculate(a, b):          │   return a + b
+    """..."""                 │
+    return a + b  # ...       │
+
+The original file is never overwritten.
+
+If the input is:
+
+example.py
+
+the output becomes:
+
+example_clean.py
+
+"02" — What gets removed
+
+Element| Result
+Module docstrings| Removed
+Function docstrings| Removed
+Async function docstrings| Removed
+Class docstrings| Removed
+Standalone comments| Removed
+Inline comments| Removed
+Executable code| Preserved
+Original file| Preserved
+
+CleanPy uses Python's "ast" module to identify docstrings and "tokenize" to identify comments.
+
+"03" — Usage
+
+There is nothing to install.
+
+No package manager.
+
+No external dependencies.
+
+Just Python.
+
+Run
+
+python cleaner.py example.py
+
+Result
+
+example.py
+example_clean.py
+
+CleanPy automatically creates the cleaned file beside the original.
+
+CLI
+
+python cleaner.py <python_file>
+
+The utility expects exactly one Python file as its argument.
+
+"04" — Example
+
+Before
+
+# Calculate the total
+
+def calculate(a, b):
+    """Return the sum of two values."""
+    return a + b  # add the values
+
+After
+
+def calculate(a, b):
+    return a + b
+
+The transformation focuses on removing the descriptive layer while retaining the executable source.
+
+"05" — How it works
+
+CleanPy doesn't blindly search for strings such as "#" or """"".
+
+It parses the source first.
+
+                   Python file
+                       │
+                       ▼
+                 Python AST
+                       │
+                       ├──── module docstring
+                       ├──── class docstring
+                       ├──── function docstring
+                       └──── async function docstring
+                       │
+                       ▼
+                  Tokenization
+                       │
+                       ├──── standalone comments
+                       └──── inline comments
+                       │
+                       ▼
+                 Cleaned source
+                       │
+                       ▼
+                *_clean.py
+
+Docstrings are discovered through the Python AST, while comment tokens are identified through Python's tokenizer.
+
+This allows the cleaner to work with Python syntax rather than relying on simple text replacement.
+
+"06" — Output behavior
+
+CleanPy follows a deliberately safe output model.
+
+                  ┌─────────────────┐
+                  │    example.py   │
+                  └────────┬────────┘
+                           │
+                           ▼
+                       cleanpy
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+              ▼                         ▼
+       original stays             new file created
+          untouched               example_clean.py
+
+The output filename is generated from the original filename by adding "_clean" before ".py".
+
+"07" — Built around Python
+
+CleanPy intentionally keeps its implementation small.
+
+Its core relies on Python's standard library:
+
+import ast
+import io
+import sys
+import tokenize
+from pathlib import Path
+
+No third-party runtime packages are required.
+
+That means the project can stay lightweight and portable.
+
+"08" — Project structure
+
+cleanpy/
+│
+├── cleaner.py
+├── README.md
+└── LICENSE
+
+The main executable logic lives in "cleaner.py".
+
+"09" — Error handling
+
+CleanPy handles common input and processing failures instead of silently continuing.
+
+invalid path       → File not found
+non-Python file    → Invalid input type
+invalid Python     → Syntax error
+encoding problem   → Unicode error
+filesystem issue   → OS error
+
+The CLI catches these errors and reports them to the user.
+
+"10" — Design principles
+
+Small
+
+One focused utility.
+
+Local
+
+Your source stays on your machine.
+
+Non-destructive
+
+The input file is not replaced.
+
+Dependency-free
+
+Built with Python's standard library.
+
+Predictable
+
+Input:
+
+file.py
+
+Output:
+
+file_clean.py
+
+"11" — Requirements
+
+Python 3.x
+
+Nothing else.
+
+"12" — Why clean source?
+
+Comments and docstrings are valuable during development.
+
+But there are situations where a cleaner representation of the source is useful — inspection, transformation pipelines, experimentation, or simply reducing visual noise.
+
+CleanPy doesn't try to decide what your code should look like.
+
+It simply gives you another copy.
+
+your source
+     │
+     ├── original
+     │
+     └── cleaned
+
+Both can coexist.
+
+"13" — Safety first
+
+CleanPy writes to a new file instead of replacing the source file.
+
+That means you can compare:
+
+original.py
+original_clean.py
+
+before deciding what to keep.
+
+No destructive overwrite is part of the normal workflow.
+
+"14" — License
+
+Released under the MIT License.
+
+See ""LICENSE"" (LICENSE) for the complete license text.
+
+<br><div align="center">cleanpy
+
+less noise
+same code
+
+<br>Built small. Built deliberately.
+
+</div>
 Instead of modifying your original file, CleanPy creates a separate cleaned copy:
 
 script.py
